@@ -148,7 +148,7 @@ function updatePageTexts() {
 					}
 				}
 
-				// 3. Announcement 标题
+				// 3. Announcement 标题和内容
 				const announcementWidget = document.querySelector(
 					'widget-layout[data-id="announcement"]',
 				);
@@ -165,6 +165,68 @@ function updatePageTexts() {
 							"aria-label",
 							translations[I18nKey.announcementClose],
 						);
+					}
+					// 更新公告栏内容
+					const announcementContentMap: Record<
+						string,
+						{ en: string; zh_CN: string }
+					> = {
+						"Welcome to my blog! This is a sample announcement.": {
+							en: "Welcome to my blog! This is a sample announcement.",
+							zh_CN: "欢迎来到我的博客！这是一个示例公告。",
+						},
+					};
+					// 创建反向映射
+					const announcementContentReverseMap: Record<string, string> = {};
+					Object.values(announcementContentMap).forEach((translation) => {
+						announcementContentReverseMap[translation.zh_CN] = translation.en;
+					});
+					const contentElement = announcementWidget.querySelector(
+						".text-neutral-600, .text-neutral-300",
+					);
+					if (contentElement) {
+						const contentText = contentElement.textContent?.trim() || "";
+						let translatedContent: string | null = null;
+						if (announcementContentMap[contentText]) {
+							translatedContent =
+								announcementContentMap[contentText][lang as "en" | "zh_CN"] ||
+								announcementContentMap[contentText].en;
+						} else if (
+							lang === "en" &&
+							announcementContentReverseMap[contentText]
+						) {
+							translatedContent = announcementContentReverseMap[contentText];
+						}
+						if (translatedContent && translatedContent !== contentText) {
+							contentElement.textContent = translatedContent;
+						}
+					}
+					// 更新公告栏链接文本
+					const linkTextMap: Record<string, { en: string; zh_CN: string }> = {
+						"Learn More": {
+							en: "Learn More",
+							zh_CN: "了解更多",
+						},
+					};
+					// 创建链接文本的反向映射
+					const linkTextReverseMap: Record<string, string> = {};
+					Object.values(linkTextMap).forEach((translation) => {
+						linkTextReverseMap[translation.zh_CN] = translation.en;
+					});
+					const linkElement = announcementWidget.querySelector("a.btn-regular");
+					if (linkElement) {
+						const linkText = linkElement.textContent?.trim() || "";
+						let translatedLinkText: string | null = null;
+						if (linkTextMap[linkText]) {
+							translatedLinkText =
+								linkTextMap[linkText][lang as "en" | "zh_CN"] ||
+								linkTextMap[linkText].en;
+						} else if (lang === "en" && linkTextReverseMap[linkText]) {
+							translatedLinkText = linkTextReverseMap[linkText];
+						}
+						if (translatedLinkText && translatedLinkText !== linkText) {
+							linkElement.textContent = translatedLinkText;
+						}
 					}
 				}
 
@@ -407,7 +469,244 @@ function updatePageTexts() {
 					}
 				}
 
-				// 12. 更新所有包含已知英文文本的元素（通用方法）
+				// 12. 更新文章标题和描述（需要翻译映射表）
+				// 创建双向映射：英文 -> 翻译对象，中文 -> 翻译对象
+				const postTitleMap: Record<string, { en: string; zh_CN: string }> = {
+					"Markdown Tutorial": {
+						en: "Markdown Tutorial",
+						zh_CN: "Markdown 教程",
+					},
+					"Encrypted Post": {
+						en: "Encrypted Post",
+						zh_CN: "加密文章",
+					},
+					"Markdown Extended Features": {
+						en: "Markdown Extended Features",
+						zh_CN: "Markdown 扩展功能",
+					},
+					"Simple Guides for Mizuki": {
+						en: "Simple Guides for Mizuki",
+						zh_CN: "Mizuki 简单指南",
+					},
+					"Cover Image of the Post": {
+						en: "Cover Image of the Post",
+						zh_CN: "文章封面图片",
+					},
+					"Markdown Mermaid": {
+						en: "Markdown Mermaid",
+						zh_CN: "Markdown Mermaid",
+					},
+					"Include Video in the Posts": {
+						en: "Include Video in the Posts",
+						zh_CN: "在文章中嵌入视频",
+					},
+					"Draft Example": {
+						en: "Draft Example",
+						zh_CN: "草稿示例",
+					},
+				};
+
+				// 创建反向映射：从中文文本找到对应的英文文本
+				const postTitleReverseMap: Record<string, string> = {};
+				Object.values(postTitleMap).forEach((translation) => {
+					postTitleReverseMap[translation.zh_CN] = translation.en;
+				});
+
+				// 辅助函数：根据当前文本和目标语言找到翻译
+				function findTranslation(
+					text: string,
+					targetLang: string,
+				): string | null {
+					// 先尝试直接匹配
+					if (postTitleMap[text]) {
+						return postTitleMap[text][targetLang as "en" | "zh_CN"] || null;
+					}
+					// 如果是中文，尝试反向查找
+					if (targetLang === "en" && postTitleReverseMap[text]) {
+						return postTitleReverseMap[text];
+					}
+					// 遍历所有翻译，查找匹配的中文文本
+					if (targetLang === "en") {
+						for (const [enText, translation] of Object.entries(postTitleMap)) {
+							if (translation.zh_CN === text) {
+								return enText;
+							}
+						}
+					}
+					return null;
+				}
+
+				// 文章描述翻译映射表
+				const postDescriptionMap: Record<
+					string,
+					{ en: string; zh_CN: string }
+				> = {
+					"A simple example of a Markdown blog post.": {
+						en: "A simple example of a Markdown blog post.",
+						zh_CN: "一个简单的 Markdown 博客文章示例。",
+					},
+					"A simple example of a Markdown blog post with Mermaid.": {
+						en: "A simple example of a Markdown blog post with Mermaid.",
+						zh_CN: "一个包含 Mermaid 图表的 Markdown 博客文章示例。",
+					},
+					"Read more about Markdown features in Mizuki": {
+						en: "Read more about Markdown features in Mizuki",
+						zh_CN: "了解更多关于 Mizuki 中的 Markdown 功能",
+					},
+					"This is an article for testing the page encryption feature": {
+						en: "This is an article for testing the page encryption feature",
+						zh_CN: "这是一篇用于测试页面加密功能的文章",
+					},
+					"This post demonstrates how to include embedded video in a blog post.":
+						{
+							en: "This post demonstrates how to include embedded video in a blog post.",
+							zh_CN: "这篇文章演示了如何在博客文章中嵌入视频。",
+						},
+					"This article is currently in a draft state and is not published. Therefore, it will not be visible to the general audience. The content is still a work in progress and may require further editing and review.":
+						{
+							en: "This article is currently in a draft state and is not published. Therefore, it will not be visible to the general audience. The content is still a work in progress and may require further editing and review.",
+							zh_CN:
+								"这篇文章目前处于草稿状态，尚未发布。因此，它不会对普通观众可见。内容仍在进行中，可能需要进一步编辑和审查。",
+						},
+					"How to use this blog template.": {
+						en: "How to use this blog template.",
+						zh_CN: "如何使用这个博客模板。",
+					},
+				};
+
+				// 创建描述的反向映射
+				const postDescriptionReverseMap: Record<string, string> = {};
+				Object.values(postDescriptionMap).forEach((translation) => {
+					postDescriptionReverseMap[translation.zh_CN] = translation.en;
+				});
+
+				// 辅助函数：根据当前描述文本和目标语言找到翻译
+				function findDescriptionTranslation(
+					text: string,
+					targetLang: string,
+				): string | null {
+					// 先尝试直接匹配
+					if (postDescriptionMap[text]) {
+						return (
+							postDescriptionMap[text][targetLang as "en" | "zh_CN"] || null
+						);
+					}
+					// 如果是中文，尝试反向查找
+					if (targetLang === "en" && postDescriptionReverseMap[text]) {
+						return postDescriptionReverseMap[text];
+					}
+					// 遍历所有翻译，查找匹配的中文文本
+					if (targetLang === "en") {
+						for (const [enText, translation] of Object.entries(
+							postDescriptionMap,
+						)) {
+							if (translation.zh_CN === text) {
+								return enText;
+							}
+						}
+					}
+					return null;
+				}
+
+				// 更新文章标题（在文章卡片和详情页中）
+				// 方法：遍历所有可能的标题元素，查找并替换
+				const titleSelectors = [
+					".card-base a.text-3xl", // PostCard 中的标题链接
+					".card-base .text-3xl", // PostCard 中的标题
+					"h1", // 文章详情页的 h1 标题
+					".text-\\[2\\.25rem\\]", // 文章详情页的大标题
+					"[data-pagefind-meta='title']", // Pagefind 标记的标题
+				];
+
+				titleSelectors.forEach((selector) => {
+					try {
+						const titleElements = document.querySelectorAll(selector);
+						titleElements.forEach((element) => {
+							const titleText = element.textContent?.trim() || "";
+							if (titleText) {
+								const translatedTitle = findTranslation(titleText, lang);
+								if (translatedTitle && translatedTitle !== titleText) {
+									// 直接更新元素文本内容
+									element.textContent = translatedTitle;
+								}
+							}
+						});
+					} catch (e) {
+						// 忽略选择器错误（某些 CSS 选择器可能无效）
+						console.warn("LanguageSwitch: 标题选择器错误", selector, e);
+					}
+				});
+
+				// 额外处理：查找所有包含文章标题的文本节点
+				const allTitleWalker = document.createTreeWalker(
+					document.body,
+					NodeFilter.SHOW_TEXT,
+					null,
+				);
+				let titleTextNode: Node | null = allTitleWalker.nextNode();
+				while (titleTextNode !== null) {
+					const text = titleTextNode.textContent?.trim() || "";
+					if (text) {
+						const translatedTitle = findTranslation(text, lang);
+						if (translatedTitle && translatedTitle !== text) {
+							titleTextNode.textContent = translatedTitle;
+						}
+					}
+					titleTextNode = allTitleWalker.nextNode();
+				}
+
+				// 更新文章描述（在文章卡片中）
+				const descriptionSelectors = [
+					".card-base .text-75", // PostCard 中的描述
+					".line-clamp-2", // 描述文本容器
+					".line-clamp-1", // 描述文本容器（单行）
+				];
+
+				descriptionSelectors.forEach((selector) => {
+					try {
+						const descriptionElements = document.querySelectorAll(selector);
+						descriptionElements.forEach((element) => {
+							const descriptionText = element.textContent?.trim() || "";
+							if (descriptionText) {
+								const translatedDescription = findDescriptionTranslation(
+									descriptionText,
+									lang,
+								);
+								if (
+									translatedDescription &&
+									translatedDescription !== descriptionText
+								) {
+									element.textContent = translatedDescription;
+								}
+							}
+						});
+					} catch (e) {
+						console.warn("LanguageSwitch: 描述选择器错误", selector, e);
+					}
+				});
+
+				// 额外处理：查找所有包含文章描述的文本节点
+				const allDescriptionWalker = document.createTreeWalker(
+					document.body,
+					NodeFilter.SHOW_TEXT,
+					null,
+				);
+				let descriptionTextNode: Node | null = allDescriptionWalker.nextNode();
+				while (descriptionTextNode !== null) {
+					const text = descriptionTextNode.textContent?.trim() || "";
+					if (text) {
+						const translatedDescription = findDescriptionTranslation(
+							text,
+							lang,
+						);
+						if (translatedDescription && translatedDescription !== text) {
+							descriptionTextNode.textContent = translatedDescription;
+						}
+					}
+					descriptionTextNode = allDescriptionWalker.nextNode();
+				}
+
+				// 13. 更新所有包含已知英文文本的元素（通用方法，支持双向翻译）
 				const commonTextMap: Record<string, I18nKey> = {
 					Search: I18nKey.search,
 					Categories: I18nKey.categories,
@@ -426,7 +725,172 @@ function updatePageTexts() {
 					Timeline: I18nKey.timeline,
 				};
 
-				// 遍历所有文本节点，查找并替换已知的英文文本
+				// 创建反向映射：从中文文本找到对应的英文文本
+				const commonTextReverseMap: Record<string, string> = {};
+				Object.entries(commonTextMap).forEach(([enText, key]) => {
+					const zhText = translations[key];
+					if (zhText) {
+						commonTextReverseMap[zhText] = enText;
+					}
+				});
+
+				// 14. 更新分类名称（Categories）
+				const categoryNameMap: Record<string, { en: string; zh_CN: string }> = {
+					Examples: {
+						en: "Examples",
+						zh_CN: "示例",
+					},
+					Guides: {
+						en: "Guides",
+						zh_CN: "指南",
+					},
+					Technology: {
+						en: "Technology",
+						zh_CN: "技术",
+					},
+				};
+
+				// 创建分类名称的反向映射
+				const categoryNameReverseMap: Record<string, string> = {};
+				Object.values(categoryNameMap).forEach((translation) => {
+					categoryNameReverseMap[translation.zh_CN] = translation.en;
+				});
+
+				// 辅助函数：根据当前分类名称和目标语言找到翻译
+				function findCategoryTranslation(
+					text: string,
+					targetLang: string,
+				): string | null {
+					// 先尝试直接匹配
+					if (categoryNameMap[text]) {
+						return categoryNameMap[text][targetLang as "en" | "zh_CN"] || null;
+					}
+					// 如果是中文，尝试反向查找
+					if (targetLang === "en" && categoryNameReverseMap[text]) {
+						return categoryNameReverseMap[text];
+					}
+					// 遍历所有翻译，查找匹配的中文文本
+					if (targetLang === "en") {
+						for (const [enText, translation] of Object.entries(
+							categoryNameMap,
+						)) {
+							if (translation.zh_CN === text) {
+								return enText;
+							}
+						}
+					}
+					return null;
+				}
+
+				// 更新分类名称（在侧边栏和文章元数据中）
+				// 方法1: 更新侧边栏分类列表
+				const categoriesWidgetForNames = document.querySelector(
+					'widget-layout[data-id="categories"]',
+				);
+				if (categoriesWidgetForNames) {
+					const categoryLinks =
+						categoriesWidgetForNames.querySelectorAll("a button");
+					categoryLinks.forEach((button) => {
+						// ButtonLink 的结构：button > div > div (分类名称) + div (数字徽章)
+						const textContainer = button.querySelector(
+							"div.overflow-hidden.text-left",
+						);
+						if (textContainer) {
+							const categoryText = textContainer.textContent?.trim() || "";
+							if (categoryText) {
+								const translatedCategory = findCategoryTranslation(
+									categoryText,
+									lang,
+								);
+								if (translatedCategory && translatedCategory !== categoryText) {
+									// 更新文本容器中的文本节点
+									const walker = document.createTreeWalker(
+										textContainer,
+										NodeFilter.SHOW_TEXT,
+										null,
+									);
+									let textNode: Node | null = walker.nextNode();
+									while (textNode !== null) {
+										if (textNode.textContent?.trim() === categoryText) {
+											textNode.textContent = translatedCategory;
+											break;
+										}
+										textNode = walker.nextNode();
+									}
+								}
+							}
+						}
+					});
+				}
+
+				// 方法2: 更新文章元数据中的分类名称
+				const categorySelectors = [
+					".link-lg", // PostMeta 中的分类链接
+					".text-50", // 分类文本
+				];
+
+				categorySelectors.forEach((selector) => {
+					try {
+						const categoryElements = document.querySelectorAll(selector);
+						categoryElements.forEach((element) => {
+							const categoryText = element.textContent?.trim() || "";
+							if (categoryText) {
+								const translatedCategory = findCategoryTranslation(
+									categoryText,
+									lang,
+								);
+								if (translatedCategory && translatedCategory !== categoryText) {
+									element.textContent = translatedCategory;
+								}
+							}
+						});
+					} catch (e) {
+						console.warn("LanguageSwitch: 分类选择器错误", selector, e);
+					}
+				});
+
+				// 方法3: 遍历所有文本节点，查找并替换分类名称
+				// 注意：需要处理可能包含数字的情况（如 "Examples 5"）
+				const allCategoryWalker = document.createTreeWalker(
+					document.body,
+					NodeFilter.SHOW_TEXT,
+					null,
+				);
+				let categoryTextNode: Node | null = allCategoryWalker.nextNode();
+				while (categoryTextNode !== null) {
+					const text = categoryTextNode.textContent?.trim() || "";
+					if (text) {
+						// 先尝试完全匹配
+						let translatedCategory = findCategoryTranslation(text, lang);
+						// 如果完全匹配失败，尝试匹配文本开头（处理 "Examples 5" 这种情况）
+						if (!translatedCategory) {
+							for (const [enName, translation] of Object.entries(
+								categoryNameMap,
+							)) {
+								if (
+									text.startsWith(enName) ||
+									text.startsWith(translation.zh_CN)
+								) {
+									// 提取数字部分（如果有）
+									const numberMatch = text.match(/\s+(\d+)$/);
+									const numberPart = numberMatch ? numberMatch[0] : "";
+									if (lang === "zh_CN") {
+										translatedCategory = translation.zh_CN + numberPart;
+									} else {
+										translatedCategory = translation.en + numberPart;
+									}
+									break;
+								}
+							}
+						}
+						if (translatedCategory && translatedCategory !== text) {
+							categoryTextNode.textContent = translatedCategory;
+						}
+					}
+					categoryTextNode = allCategoryWalker.nextNode();
+				}
+
+				// 遍历所有文本节点，查找并替换已知的文本（支持双向翻译）
 				const allTextWalker = document.createTreeWalker(
 					document.body,
 					NodeFilter.SHOW_TEXT,
@@ -435,11 +899,19 @@ function updatePageTexts() {
 				let allTextNode: Node | null = allTextWalker.nextNode();
 				while (allTextNode !== null) {
 					const nodeText = allTextNode.textContent?.trim() || "";
-					// 只处理完全匹配的文本（避免误替换）
-					if (nodeText && commonTextMap[nodeText]) {
-						const key = commonTextMap[nodeText];
-						if (translations[key] && nodeText !== translations[key]) {
-							allTextNode.textContent = translations[key];
+					if (nodeText) {
+						let targetText: string | null = null;
+						// 先尝试英文 -> 中文
+						if (commonTextMap[nodeText]) {
+							const key = commonTextMap[nodeText];
+							targetText = translations[key];
+						}
+						// 再尝试中文 -> 英文
+						else if (lang === "en" && commonTextReverseMap[nodeText]) {
+							targetText = commonTextReverseMap[nodeText];
+						}
+						if (targetText && targetText !== nodeText) {
+							allTextNode.textContent = targetText;
 						}
 					}
 					allTextNode = allTextWalker.nextNode();
