@@ -88,7 +88,8 @@ const { remarkPluginFrontmatter } = await entry.render();
                     </a>
                 ))
             ) : (
-                <span class="text-xs text-50">{i18n(I18nKey.noTags)}</span>
+                // @ts-ignore - Astro is available globally in Astro components
+                <span class="text-xs text-50">{i18n(I18nKey.noTags, Astro.request)}</span>
             )}
         </div>
     </div>

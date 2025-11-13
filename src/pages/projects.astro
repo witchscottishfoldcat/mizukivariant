@@ -15,10 +15,13 @@ import MainGridLayout from "../layouts/MainGridLayout.astro";
 import { loadIconify } from "../utils/icon-loader";
 
 // 检查项目页面是否启用
+// @ts-ignore - Astro is available globally in Astro components
 if (!siteConfig.featurePages.projects) {
+	// @ts-ignore
 	return Astro.redirect("/404/");
 }
 
+// @ts-ignore
 const { lang } = Astro.props;
 
 // 加载Iconify图标库
@@ -45,22 +48,52 @@ const projectsByCategory = categories.reduce(
 	{} as Record<string, typeof projectsData>,
 );
 
-const title = i18n(I18nKey.projects);
-const subtitle = i18n(I18nKey.projectsSubtitle);
+// @ts-ignore - Astro is available globally in Astro components
+const request = Astro.request;
+// @ts-ignore
+const title = i18n(I18nKey.projects, request);
+// @ts-ignore
+const subtitle = i18n(I18nKey.projectsSubtitle, request);
+// @ts-ignore
+const projectsWeb = i18n(I18nKey.projectsWeb, request);
+// @ts-ignore
+const projectsMobile = i18n(I18nKey.projectsMobile, request);
+// @ts-ignore
+const projectsDesktop = i18n(I18nKey.projectsDesktop, request);
+// @ts-ignore
+const projectsOther = i18n(I18nKey.projectsOther, request);
+// @ts-ignore
+const uncategorized = i18n(I18nKey.uncategorized, request);
+// @ts-ignore
+const projectsTotal = i18n(I18nKey.projectsTotal, request);
+// @ts-ignore
+const projectsCompleted = i18n(I18nKey.projectsCompleted, request);
+// @ts-ignore
+const projectsInProgress = i18n(I18nKey.projectsInProgress, request);
+// @ts-ignore
+const projectsTechStack = i18n(I18nKey.projectsTechStack, request);
+// @ts-ignore
+const projectsFeatured = i18n(I18nKey.projectsFeatured, request);
+// @ts-ignore
+const projectsPlanned = i18n(I18nKey.projectsPlanned, request);
+// @ts-ignore
+const projectsVisit = i18n(I18nKey.projectsVisit, request);
+// @ts-ignore
+const projectsGitHub = i18n(I18nKey.projectsGitHub, request);
 
 // 获取分类文本的国际化翻译
 const getCategoryText = (category: string) => {
 	switch (category) {
 		case "web":
-			return i18n(I18nKey.projectsWeb);
+			return projectsWeb;
 		case "mobile":
-			return i18n(I18nKey.projectsMobile);
+			return projectsMobile;
 		case "desktop":
-			return i18n(I18nKey.projectsDesktop);
+			return projectsDesktop;
 		case "other":
-			return i18n(I18nKey.projectsOther);
+			return projectsOther;
 		case UNCATEGORIZED:
-			return i18n(I18nKey.uncategorized);
+			return uncategorized;
 		default:
 			return category;
 	}
@@ -75,10 +108,10 @@ const getCategoryText = (category: string) => {
         <h1 class="text-4xl font-bold text-black/90 dark:text-white/90 mb-2 relative
                   before:w-1 before:h-8 before:rounded-md before:bg-[var(--primary)]
                   before:absolute before:top-1/2 before:-translate-y-1/2 before:-left-4">
-          {i18n(I18nKey.projects)}
+          {title}
         </h1>
         <p class="text-lg text-black/60 dark:text-white/60">
-          {i18n(I18nKey.projectsSubtitle)}
+          {subtitle}
         </p>
       </div>
 
@@ -86,19 +119,19 @@ const getCategoryText = (category: string) => {
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-4">
           <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.total}</div>
-          <div class="text-sm text-blue-600/70 dark:text-blue-400/70">{i18n(I18nKey.projectsTotal)}</div>
+          <div class="text-sm text-blue-600/70 dark:text-blue-400/70">{projectsTotal}</div>
         </div>
         <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-4">
           <div class="text-2xl font-bold text-green-600 dark:text-green-400">{stats.byStatus.completed}</div>
-          <div class="text-sm text-green-600/70 dark:text-green-400/70">{i18n(I18nKey.projectsCompleted)}</div>
+          <div class="text-sm text-green-600/70 dark:text-green-400/70">{projectsCompleted}</div>
         </div>
         <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-lg p-4">
           <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.byStatus.inProgress}</div>
-          <div class="text-sm text-yellow-600/70 dark:text-yellow-400/70">{i18n(I18nKey.projectsInProgress)}</div>
+          <div class="text-sm text-yellow-600/70 dark:text-yellow-400/70">{projectsInProgress}</div>
         </div>
         <div class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg p-4">
           <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{allTechStack.length}</div>
-          <div class="text-sm text-purple-600/70 dark:text-purple-400/70">{i18n(I18nKey.projectsTechStack)}</div>
+          <div class="text-sm text-purple-600/70 dark:text-purple-400/70">{projectsTechStack}</div>
         </div>
       </div>
 
@@ -108,7 +141,7 @@ const getCategoryText = (category: string) => {
           <h2 class="text-2xl font-bold text-black/90 dark:text-white/90 mb-4 relative
                     before:w-1 before:h-6 before:rounded-md before:bg-[var(--primary)]
                     before:absolute before:top-1/2 before:-translate-y-1/2 before:-left-4">
-            {i18n(I18nKey.projectsFeatured)}
+            {projectsFeatured}
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {featuredProjects.map((project) => (
@@ -134,9 +167,9 @@ const getCategoryText = (category: string) => {
                         ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
                         : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
                     }`}>
-                      {i18n(project.status === 'completed' ? I18nKey.projectsCompleted : 
-                            project.status === 'in-progress' ? I18nKey.projectsInProgress : 
-                            I18nKey.projectsPlanned)}
+                      {project.status === 'completed' ? projectsCompleted : 
+                            project.status === 'in-progress' ? projectsInProgress : 
+                            projectsPlanned}
                     </span>
                   </div>
                   <p class="text-black/60 dark:text-white/60 mb-4 line-clamp-2">
@@ -163,7 +196,7 @@ const getCategoryText = (category: string) => {
                         class="btn-gradient btn-gradient-primary btn-gradient-md"
                       >
                         <iconify-icon icon="material-symbols:open-in-new" width="18" height="18"></iconify-icon>
-                        {i18n(I18nKey.projectsVisit)}
+                        {projectsVisit}
                       </a>
                     )}
                     {project.sourceCode && (
@@ -174,7 +207,7 @@ const getCategoryText = (category: string) => {
                         class="btn-gradient btn-github btn-gradient-md"
                       >
                         <iconify-icon icon="mdi:github" width="18" height="18"></iconify-icon>
-                        {i18n(I18nKey.projectsGitHub)}
+                        {projectsGitHub}
                       </a>
                     )}
                   </div>
@@ -254,7 +287,7 @@ const getCategoryText = (category: string) => {
                             class="btn-gradient btn-gradient-primary btn-gradient-md"
                           >
                             <iconify-icon icon="material-symbols:open-in-new" width="18" height="18"></iconify-icon>
-                            {i18n(I18nKey.projectsVisit)}
+                            {projectsVisit}
                           </a>
                         )}
                         {project.sourceCode && (
@@ -265,7 +298,7 @@ const getCategoryText = (category: string) => {
                             class="btn-gradient btn-github btn-gradient-md"
                           >
                             <iconify-icon icon="mdi:github" width="18" height="18"></iconify-icon>
-                            {i18n(I18nKey.projectsGitHub)}
+                            {projectsGitHub}
                           </a>
                         )}
                       </div>
@@ -281,7 +314,7 @@ const getCategoryText = (category: string) => {
       <!-- 技术栈统计 -->
       <div class="mt-12 pt-8 border-t border-black/10 dark:border-white/10">
         <h2 class="text-2xl font-bold text-black/90 dark:text-white/90 mb-4">
-          {i18n(I18nKey.projectsTechStack)}
+          {projectsTechStack}
         </h2>
         <div class="flex flex-wrap gap-2">
           {allTechStack.map((tech) => (

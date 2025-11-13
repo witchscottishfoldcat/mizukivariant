@@ -16,10 +16,13 @@ import { i18n } from "../i18n/translation";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 
 // 检查技能页面是否启用
+// @ts-ignore - Astro is available globally in Astro components
 if (!siteConfig.featurePages.skills) {
+	// @ts-ignore
 	return Astro.redirect("/404/");
 }
 
+// @ts-ignore
 const { lang } = Astro.props;
 
 // 获取技能统计信息
@@ -71,28 +74,64 @@ const getLevelWidth = (level: string) => {
 	}
 };
 
+// @ts-ignore - Astro is available globally in Astro components
+const request = Astro.request;
+// @ts-ignore
+const skillsFrontend = i18n(I18nKey.skillsFrontend, request);
+// @ts-ignore
+const skillsBackend = i18n(I18nKey.skillsBackend, request);
+// @ts-ignore
+const skillsDatabase = i18n(I18nKey.skillsDatabase, request);
+// @ts-ignore
+const skillsTools = i18n(I18nKey.skillsTools, request);
+// @ts-ignore
+const skillsOther = i18n(I18nKey.skillsOther, request);
+// @ts-ignore
+const uncategorized = i18n(I18nKey.uncategorized, request);
+// @ts-ignore
+const title = i18n(I18nKey.skills, request);
+// @ts-ignore
+const subtitle = i18n(I18nKey.skillsSubtitle, request);
+// @ts-ignore
+const skillsAdvancedTitle = i18n(I18nKey.skillsAdvancedTitle, request);
+// @ts-ignore
+const skillExperience = i18n(I18nKey.skillExperience, request);
+// @ts-ignore
+const skillYears = i18n(I18nKey.skillYears, request);
+// @ts-ignore
+const skillMonths = i18n(I18nKey.skillMonths, request);
+// @ts-ignore
+const skillsExpert = i18n(I18nKey.skillsExpert, request);
+// @ts-ignore
+const skillsAdvanced = i18n(I18nKey.skillsAdvanced, request);
+// @ts-ignore
+const skillsIntermediate = i18n(I18nKey.skillsIntermediate, request);
+// @ts-ignore
+const skillsBeginner = i18n(I18nKey.skillsBeginner, request);
+// @ts-ignore
+const projectsText = i18n(I18nKey.projects, request);
+// @ts-ignore
+const projectText = i18n(I18nKey.project, request);
+
 // 获取分类的翻译文本
 const getCategoryText = (category: string) => {
 	switch (category) {
 		case "frontend":
-			return i18n(I18nKey.skillsFrontend);
+			return skillsFrontend;
 		case "backend":
-			return i18n(I18nKey.skillsBackend);
+			return skillsBackend;
 		case "database":
-			return i18n(I18nKey.skillsDatabase);
+			return skillsDatabase;
 		case "tools":
-			return i18n(I18nKey.skillsTools);
+			return skillsTools;
 		case "other":
-			return i18n(I18nKey.skillsOther);
+			return skillsOther;
 		case UNCATEGORIZED:
-			return i18n(I18nKey.uncategorized);
+			return uncategorized;
 		default:
 			return category;
 	}
 };
-
-const title = i18n(I18nKey.skills);
-const subtitle = i18n(I18nKey.skillsSubtitle);
 
 // 收集所有技能图标用于预加载
 const allIcons = skillsData.map((skill) => skill.icon).filter(Boolean);
@@ -111,10 +150,10 @@ let animated = false;
         <h1 class="text-4xl font-bold text-black/90 dark:text-white/90 mb-2 relative
                   before:w-1 before:h-8 before:rounded-md before:bg-[var(--primary)]
                   before:absolute before:top-1/2 before:-translate-y-1/2 before:-left-4">
-          {i18n(I18nKey.skills)}
+          {title}
         </h1>
         <p class="text-lg text-black/60 dark:text-white/60">
-          {i18n(I18nKey.skillsSubtitle)}
+          {subtitle}
         </p>
       </div>
 
@@ -127,7 +166,7 @@ let animated = false;
           <h2 class="text-2xl font-bold text-black/90 dark:text-white/90 mb-4 relative
                     before:w-1 before:h-6 before:rounded-md before:bg-[var(--primary)]
                     before:absolute before:top-1/2 before:-translate-y-1/2 before:-left-4">
-            {i18n(I18nKey.skillsAdvancedTitle)}
+            {skillsAdvancedTitle}
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {advancedSkills.map((skill) => (
@@ -161,9 +200,9 @@ let animated = false;
                     </p>
                     <div class="mb-3">
                       <div class="flex justify-between text-sm mb-1">
-                        <span class="text-black/60 dark:text-white/60">{i18n(I18nKey.skillExperience)}</span>
+                        <span class="text-black/60 dark:text-white/60">{skillExperience}</span>
                         <span class="text-black/80 dark:text-white/80">
-                          {skill.experience.years}{i18n(I18nKey.skillYears)}{skill.experience.months > 0 ? ` ${skill.experience.months}${i18n(I18nKey.skillMonths)}` : ''}
+                          {skill.experience.years}{skillYears}{skill.experience.months > 0 ? ` ${skill.experience.months}${skillMonths}` : ''}
                         </span>
                       </div>
                       <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -228,10 +267,10 @@ let animated = false;
                             {skill.name}
                           </h3>
                           <span class={`px-2 py-1 text-xs rounded-full shrink-0 ml-2 ${getLevelColor(skill.level)}`}>
-                            {i18n(skill.level === 'expert' ? I18nKey.skillsExpert :
-                                  skill.level === 'advanced' ? I18nKey.skillsAdvanced :
-                                  skill.level === 'intermediate' ? I18nKey.skillsIntermediate :
-                                  I18nKey.skillsBeginner)}
+                            {skill.level === 'expert' ? skillsExpert :
+                                  skill.level === 'advanced' ? skillsAdvanced :
+                                  skill.level === 'intermediate' ? skillsIntermediate :
+                                  skillsBeginner}
                           </span>
                         </div>
                         <p class="text-black/60 dark:text-white/60 mb-2 text-sm line-clamp-2">
@@ -239,11 +278,11 @@ let animated = false;
                         </p>
                         <div class="flex justify-between text-xs text-black/60 dark:text-white/60">
                           <span>
-                            {skill.experience.years}{i18n(I18nKey.skillYears)}{skill.experience.months > 0 ? ` ${skill.experience.months}${i18n(I18nKey.skillMonths)}` : ''}
+                            {skill.experience.years}{skillYears}{skill.experience.months > 0 ? ` ${skill.experience.months}${skillMonths}` : ''}
                           </span>
                           {skill.projects && skill.projects.length > 0 && (
                             <span>
-                              {skill.projects.length} {skill.projects.length > 1 ? i18n(I18nKey.projects) : i18n(I18nKey.project)}
+                              {skill.projects.length} {skill.projects.length > 1 ? projectsText : projectText}
                             </span>
                           )}
                         </div>

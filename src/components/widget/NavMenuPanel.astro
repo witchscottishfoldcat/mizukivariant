@@ -1,12 +1,15 @@
 ---
 import { Icon } from "astro-icon/components";
 import { type NavBarLink, LinkPreset } from "../../types/config";
-import { LinkPresets } from "../../constants/link-presets";
+import { getLinkPresets } from "../../constants/link-presets";
 import { url } from "../../utils/url-utils";
 
 interface Props {
 	links: NavBarLink[];
 }
+
+// @ts-ignore - Astro is available globally in Astro components
+const LinkPresetsWithLang = getLinkPresets(Astro.request);
 
 // 处理links中的LinkPreset转换
 const processedLinks = Astro.props.links.map(
@@ -15,7 +18,7 @@ const processedLinks = Astro.props.links.map(
 		children: link.children?.map(
 			(child: NavBarLink | LinkPreset): NavBarLink => {
 				if (typeof child === "number") {
-					return LinkPresets[child];
+					return LinkPresetsWithLang[child];
 				}
 				return child;
 			},

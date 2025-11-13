@@ -1,6 +1,6 @@
 ---
 import ImageWrapper from "../components/misc/ImageWrapper.astro";
-import { siteConfig, siteConfig } from "../config";
+import { siteConfig } from "../config";
 import localAnimeList from "../data/anime";
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
@@ -158,26 +158,35 @@ if (ANIME_MODE === "local") {
 	animeList = [...watchingList, ...completedList];
 }
 
+// @ts-ignore - Astro is available globally in Astro components
+const request = Astro.request;
+// @ts-ignore
+const animeStatusWatchingText = i18n(I18nKey.animeStatusWatching, request);
+// @ts-ignore
+const animeStatusCompletedText = i18n(I18nKey.animeStatusCompleted, request);
+// @ts-ignore
+const animeStatusPlannedText = i18n(I18nKey.animeStatusPlanned, request);
+
 // 获取状态的翻译文本和样式
 function getStatusInfo(status: string) {
 	switch (status) {
 		case "watching":
 			return {
-				text: i18n(I18nKey.animeStatusWatching),
+				text: animeStatusWatchingText,
 				class:
 					"bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
 				icon: "▶",
 			};
 		case "completed":
 			return {
-				text: i18n(I18nKey.animeStatusCompleted),
+				text: animeStatusCompletedText,
 				class:
 					"bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
 				icon: "✓",
 			};
 		case "planned":
 			return {
-				text: i18n(I18nKey.animeStatusPlanned),
+				text: animeStatusPlannedText,
 				class:
 					"bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
 				icon: "⏰",
@@ -205,9 +214,38 @@ const stats = {
 		).toFixed(1);
 	})(),
 };
+
+// @ts-ignore - Astro is available globally in Astro components
+const animeTitle = i18n(I18nKey.anime, Astro.request);
+// @ts-ignore
+const animeSubtitle = i18n(I18nKey.animeSubtitle, Astro.request);
+// @ts-ignore
+const animeTitleText = i18n(I18nKey.animeTitle, Astro.request);
+// @ts-ignore
+const animeFilterAll = i18n(I18nKey.animeFilterAll, Astro.request);
+// @ts-ignore
+const animeStatusWatching = i18n(I18nKey.animeStatusWatching, Astro.request);
+// @ts-ignore
+const animeStatusCompleted = i18n(I18nKey.animeStatusCompleted, Astro.request);
+// @ts-ignore
+const animeStatusPlanned = i18n(I18nKey.animeStatusPlanned, Astro.request);
+// @ts-ignore
+const animeStatusOnHold = i18n(I18nKey.animeStatusOnHold, Astro.request);
+// @ts-ignore
+const animeStatusDropped = i18n(I18nKey.animeStatusDropped, Astro.request);
+// @ts-ignore
+const animeEmpty = i18n(I18nKey.animeEmpty, Astro.request);
+// @ts-ignore
+const animeEmptyBangumi = i18n(I18nKey.animeEmptyBangumi, Astro.request);
+// @ts-ignore
+const animeEmptyLocal = i18n(I18nKey.animeEmptyLocal, Astro.request);
+// @ts-ignore
+const animeYear = i18n(I18nKey.animeYear, Astro.request);
+// @ts-ignore
+const animeStudio = i18n(I18nKey.animeStudio, Astro.request);
 ---
 
-<MainGridLayout title={i18n(I18nKey.anime)} description={i18n(I18nKey.animeSubtitle)}>
+<MainGridLayout title={animeTitle} description={animeSubtitle}>
   <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
     <div class="card-base z-10 px-9 py-6 relative w-full">
       <!-- 页面标题 -->
@@ -216,22 +254,22 @@ const stats = {
           <h1 class="text-4xl font-bold text-black/90 dark:text-white/90 mb-2 relative
                     before:w-1 before:h-8 before:rounded-md before:bg-[var(--primary)]
                     before:absolute before:top-1/2 before:-translate-y-1/2 before:-left-4">
-            {i18n(I18nKey.animeTitle)}
+            {animeTitleText}
           </h1>
-          <p class="text-black/75 dark:text-white/75">{i18n(I18nKey.animeSubtitle)}</p>
+          <p class="text-black/75 dark:text-white/75">{animeSubtitle}</p>
         </div>
         
         <!-- 过滤按钮 - 参考Firefly设计 -->
         <div class="mb-6">
           <div class="filter-container flex flex-wrap gap-2">
-            <button class="filter-tag active" data-status="all">{i18n(I18nKey.animeFilterAll)}</button>
-            <button class="filter-tag" data-status="watching">{i18n(I18nKey.animeStatusWatching)}</button>
-            <button class="filter-tag" data-status="completed">{i18n(I18nKey.animeStatusCompleted)}</button>
-            <button class="filter-tag" data-status="planned">{i18n(I18nKey.animeStatusPlanned)}</button>
+            <button class="filter-tag active" data-status="all">{animeFilterAll}</button>
+            <button class="filter-tag" data-status="watching">{animeStatusWatching}</button>
+            <button class="filter-tag" data-status="completed">{animeStatusCompleted}</button>
+            <button class="filter-tag" data-status="planned">{animeStatusPlanned}</button>
             {ANIME_MODE === 'bangumi' && (
               <>
-                <button class="filter-tag" data-status="onhold">{i18n(I18nKey.animeStatusOnHold)}</button>
-                <button class="filter-tag" data-status="dropped">{i18n(I18nKey.animeStatusDropped)}</button>
+                <button class="filter-tag" data-status="onhold">{animeStatusOnHold}</button>
+                <button class="filter-tag" data-status="dropped">{animeStatusDropped}</button>
               </>
             )}
           </div>
@@ -245,7 +283,7 @@ const stats = {
           <div class="text-center py-12">
             <div class="text-5xl mb-4">😢</div>
             <h3 class="text-xl font-medium text-black/80 dark:text-white/80 mb-2">
-              {i18n(I18nKey.animeEmpty)}
+              {animeEmpty}
             </h3>
             <p class="text-black/60 dark:text-white/60">
               请在 src/config.ts 文件中设置你的 Bangumi 用户ID
@@ -313,11 +351,11 @@ const stats = {
                     <!-- 详细信息 - 更紧凑 -->
                     <div class="space-y-1 text-xs">
                       <div class="flex justify-between">
-                        <span class="text-black/50 dark:text-white/50">{i18n(I18nKey.animeYear)}</span>
+                        <span class="text-black/50 dark:text-white/50">{animeYear}</span>
                         <span class="text-black/70 dark:text-white/70">{anime.year}</span>
                       </div>
                       <div class="flex justify-between">
-                        <span class="text-black/50 dark:text-white/50">{i18n(I18nKey.animeStudio)}</span>
+                        <span class="text-black/50 dark:text-white/50">{animeStudio}</span>
                         <span class="text-black/70 dark:text-white/70 truncate ml-2">{anime.studio}</span>
                       </div>
                       <div class="flex flex-wrap gap-1 mt-2">
@@ -335,10 +373,10 @@ const stats = {
           <div class="text-center py-12">
             <div class="text-5xl mb-4">😢</div>
             <h3 class="text-xl font-medium text-black/80 dark:text-white/80 mb-2">
-              {i18n(I18nKey.animeEmpty)}
+              {animeEmpty}
             </h3>
             <p class="text-black/60 dark:text-white/60">
-              {ANIME_MODE === 'local' ? i18n(I18nKey.animeEmptyLocal) : i18n(I18nKey.animeEmptyBangumi)}
+              {ANIME_MODE === 'local' ? animeEmptyLocal : animeEmptyBangumi}
             </p>
           </div>
         )}

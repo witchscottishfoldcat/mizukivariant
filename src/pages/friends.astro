@@ -7,7 +7,9 @@ import { i18n } from "../i18n/translation";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 
 // 检查友链页面是否启用
+// @ts-ignore - Astro is available globally in Astro components
 if (!siteConfig.featurePages.friends) {
+	// @ts-ignore
 	return Astro.redirect("/404/");
 }
 

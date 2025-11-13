@@ -23,6 +23,13 @@ const { album } = Astro.props;
 if (!album) {
 	return Astro.redirect("/404/");
 }
+
+// @ts-ignore - Astro is available globally in Astro components
+const albumsBackToList = i18n(I18nKey.albumsBackToList, Astro.request);
+// @ts-ignore
+const albumsPhotosCount = i18n(I18nKey.albumsPhotosCount, Astro.request);
+// @ts-ignore
+const albumsPhotoCount = i18n(I18nKey.albumsPhotoCount, Astro.request);
 ---
 
 <MainGridLayout title={album.title} description={album.description || album.title}>
@@ -38,7 +45,7 @@ if (!album) {
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
           </svg>
-          {i18n(I18nKey.albumsBackToList)}
+          {albumsBackToList}
         </a>
       </div>
 
@@ -56,7 +63,7 @@ if (!album) {
         
         <!-- 相册元数据 -->
         <div class="flex flex-wrap items-center gap-4 text-sm text-neutral-500 dark:text-neutral-500">
-          <span>{album.photos.length} {album.photos.length > 1 ? i18n(I18nKey.albumsPhotosCount) : i18n(I18nKey.albumsPhotoCount)}</span>
+          <span>{album.photos.length} {album.photos.length > 1 ? albumsPhotosCount : albumsPhotoCount}</span>
           <time>{new Date(album.date).toLocaleDateString('zh-CN')}</time>
           {album.location && (
             <span class="flex items-center gap-1">

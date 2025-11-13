@@ -22,7 +22,6 @@ import {
 import { defaultFavicons } from "../constants/icon";
 import type { Favicon, SakuraConfig } from "../types/config";
 import { pathsEqual, url } from "../utils/url-utils";
-import { initLanguageSettings } from "@utils/language-utils";
 
 import "katex/dist/katex.css";
 import "../styles/mobile-navbar.css";
@@ -115,9 +114,29 @@ if (siteConfig.generateOgImages && postSlug) {
 const favicons: Favicon[] =
 	siteConfig.favicon.length > 0 ? siteConfig.favicon : defaultFavicons;
 
-// const siteLang = siteConfig.lang.replace('_', '-')
+// 从 Cookie 读取语言设置（如果 props 中没有提供）
 if (!lang) {
-	lang = `${siteConfig.lang}`;
+	// @ts-ignore - Astro is available globally in Astro components
+	const request = Astro.request;
+	// @ts-ignore
+	const cookieHeader = request?.headers.get("cookie") || "";
+	// @ts-ignore
+	const cookies = cookieHeader.split(";").map(c => c.trim());
+	// @ts-ignore
+	const languageCookie = cookies.find(c => c.startsWith("language="));
+	// @ts-ignore
+	const cookieLang = languageCookie ? languageCookie.split("=")[1]?.trim() : null;
+	// @ts-ignore
+	if (cookieLang) {
+		// @ts-ignore
+		lang = cookieLang;
+		// @ts-ignore
+		console.log("Layout (服务端): 从Cookie读取语言", lang);
+	} else {
+		lang = `${siteConfig.lang}`;
+		// @ts-ignore
+		console.log("Layout (服务端): 使用默认语言", lang);
+	}
 }
 const siteLang = lang.replace("_", "-");
 
@@ -1256,16 +1275,12 @@ window.onresize = () => {
 	document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
 }
 
-// 在页面内容渲染前初始化语言设置
-const lang = initLanguageSettings();
-// 确保页面使用正确的语言
-document.documentElement.lang = lang;
+// 语言初始化已由 LanguageInit.astro 组件处理
 // 触发一个自定义事件，通知语言已初始化
-window.dispatchEvent(new CustomEvent('language-initialized', { detail: { lang } }));
-
-// 调试i18n函数
-import { debugI18n } from "@i18n/debug";
-debugI18n();
+if (typeof window !== "undefined" && (window as any).__currentLanguage) {
+	const lang = (window as any).__currentLanguage;
+	window.dispatchEvent(new CustomEvent('language-initialized', { detail: { lang } }));
+}
 
 // 页面加载完成后初始化banner和轮播图
 if (document.readyState === 'loading') {

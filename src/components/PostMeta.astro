@@ -45,6 +45,17 @@ const {
   minutes,
   showWordCount = false // 默认不显示字数统计
 } = Astro.props;
+
+// @ts-ignore - Astro is available globally in Astro components
+const request = Astro.request;
+// @ts-ignore
+const uncategorizedText = i18n(I18nKey.uncategorized, request);
+// @ts-ignore
+const wordsCountText = i18n(I18nKey.wordsCount, request);
+// @ts-ignore
+const wordCountText = i18n(I18nKey.wordCount, request);
+// @ts-ignore
+const noTagsText = i18n(I18nKey.noTags, request);
 ---
 
 <div class:list={["flex flex-wrap text-neutral-500 dark:text-neutral-400 items-center gap-4 gap-x-4 gap-y-2", className]}>
@@ -75,7 +86,7 @@ const {
             <a href={getCategoryUrl(category || '')} aria-label={`View all posts in the ${category} category`}
                class="link-lg transition text-50 text-sm font-medium
                             hover:text-[var(--primary)] dark:hover:text-[var(--primary)] whitespace-nowrap">
-                {category || i18n(I18nKey.uncategorized)}
+                {category || uncategorizedText}
             </a>
         </div>
     </div>
@@ -87,7 +98,7 @@ const {
                 <Icon name="material-symbols:article-outline-rounded" class="text-xl"></Icon>
             </div>
             <span class="text-50 text-sm font-medium">
-                {words} {words > 1 ? i18n(I18nKey.wordsCount) : i18n(I18nKey.wordCount)}
+                {words} {words > 1 ? wordsCountText : wordCountText}
             </span>
         </div>
     )}
@@ -109,7 +120,7 @@ const {
                         </a>
                     </>
                 ))}
-                {!(tags && tags.length > 0) && <div class="transition text-50 text-sm font-medium">{i18n(I18nKey.noTags)}</div>}
+                {!(tags && tags.length > 0) && <div class="transition text-50 text-sm font-medium">{noTagsText}</div>}
             </div>
         </div>
     )}

@@ -12,9 +12,22 @@ if (!siteConfig.featurePages.albums) {
 
 // 获取所有相册
 const albumsData = await scanAlbums();
+
+// @ts-ignore - Astro is available globally in Astro components
+const albumsTitle = i18n(I18nKey.albums, Astro.request);
+// @ts-ignore
+const albumsSubtitle = i18n(I18nKey.albumsSubtitle, Astro.request);
+// @ts-ignore
+const albumsPhotosCount = i18n(I18nKey.albumsPhotosCount, Astro.request);
+// @ts-ignore
+const albumsPhotoCount = i18n(I18nKey.albumsPhotoCount, Astro.request);
+// @ts-ignore
+const albumsEmpty = i18n(I18nKey.albumsEmpty, Astro.request);
+// @ts-ignore
+const albumsEmptyDesc = i18n(I18nKey.albumsEmptyDesc, Astro.request);
 ---
 
-<MainGridLayout title={i18n(I18nKey.albums)} description={i18n(I18nKey.albumsSubtitle)}>
+<MainGridLayout title={albumsTitle} description={albumsSubtitle}>
   <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
     <div class="card-base z-10 px-9 py-6 relative w-full">
       
@@ -23,10 +36,10 @@ const albumsData = await scanAlbums();
         <h1 class="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-3 relative
                   before:w-1 before:h-8 before:rounded-md before:bg-[var(--primary)]
                   before:absolute before:top-1/2 before:-translate-y-1/2 before:-left-4">
-          {i18n(I18nKey.albums)}
+          {albumsTitle}
         </h1>
         <p class="text-neutral-600 dark:text-neutral-400">
-          {i18n(I18nKey.albumsSubtitle)}
+          {albumsSubtitle}
         </p>
       </header>
 
@@ -62,7 +75,7 @@ const albumsData = await scanAlbums();
                 <!-- 元数据 -->
                 <div class="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-500">
                   <div class="flex items-center gap-4">
-                    <span>{album.photos.length} {album.photos.length > 1 ? i18n(I18nKey.albumsPhotosCount) : i18n(I18nKey.albumsPhotoCount)}</span>
+                    <span>{album.photos.length} {album.photos.length > 1 ? albumsPhotosCount : albumsPhotoCount}</span>
                     {album.location && (
                       <span class="flex items-center gap-1">
                         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -105,10 +118,10 @@ const albumsData = await scanAlbums();
             </svg>
           </div>
           <h3 class="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-2">
-            {i18n(I18nKey.albumsEmpty)}
+            {albumsEmpty}
           </h3>
           <p class="text-neutral-600 dark:text-neutral-400">
-            {i18n(I18nKey.albumsEmptyDesc)}
+            {albumsEmptyDesc}
           </p>
         </div>
       )}

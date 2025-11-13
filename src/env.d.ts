@@ -3,6 +3,9 @@
 
 interface ImportMetaEnv {
   readonly UMAMI_API_KEY: string;
+  readonly PROD: boolean;
+  readonly DEV: boolean;
+  readonly MODE: string;
 }
 
 interface ImportMeta {

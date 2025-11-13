@@ -23,30 +23,89 @@ const map: { [key: string]: Translation } = {
 };
 
 export function getTranslation(lang: string): Translation {
-	return map[lang.toLowerCase()] || defaultTranslation;
+	const normalizedLang = lang.toLowerCase().replace(/-/g, "_");
+	// 只在客户端输出调试信息
+	if (typeof window !== "undefined") {
+		console.log("getTranslation: 输入语言", lang, "标准化后", normalizedLang, "映射结果", map[normalizedLang] ? "找到" : "未找到，使用默认");
+	}
+	return map[normalizedLang] || defaultTranslation;
 }
 
-export function i18n(key: I18nKey): string {
-	// 优先从全局变量获取用户设置的语言，然后是localStorage，然后是配置文件的语言，最后默认英文
-	let lang = "en";
+/**
+ * 从 Cookie 字符串中获取语言设置（用于服务端）
+ */
+function getLanguageFromCookie(cookieHeader: string | null | undefined): string | null {
+	if (!cookieHeader) return null;
+	const cookies = cookieHeader.split(";").map(c => c.trim());
+	const languageCookie = cookies.find(c => c.startsWith("language="));
+	return languageCookie ? languageCookie.split("=")[1] : null;
+}
+
+/**
+ * 获取当前语言（支持服务端和客户端）
+ * @param request 可选的 Request 对象（用于服务端从 Cookie 读取）
+ */
+function getCurrentLanguage(request?: Request): string {
+	// 客户端：优先从全局变量获取
 	if (typeof window !== "undefined") {
-		// 优先使用全局变量（由initLanguageSettings设置）
 		if ((window as any).__currentLanguage) {
-			lang = (window as any).__currentLanguage;
-			console.log("i18n: 使用全局变量语言", lang);
-		} else {
-			// 备用方案：从localStorage获取
-			lang = localStorage.getItem("language") || siteConfig.lang || "en";
-			console.log("i18n: 使用localStorage语言", lang);
-			// 存储到全局变量，避免重复访问localStorage
-			(window as any).__currentLanguage = lang;
+			const lang = (window as any).__currentLanguage;
+			console.log("getCurrentLanguage (客户端): 使用全局变量", lang);
+			return lang;
 		}
-	} else {
-		lang = siteConfig.lang || "en";
-		console.log("i18n: 使用配置文件语言", lang);
+		// 从 localStorage 获取
+		const storedLang = localStorage.getItem("language");
+		if (storedLang) {
+			(window as any).__currentLanguage = storedLang;
+			console.log("getCurrentLanguage (客户端): 使用localStorage", storedLang);
+			return storedLang;
+		}
+		console.log("getCurrentLanguage (客户端): 使用默认语言", siteConfig.lang);
 	}
 	
+	// 服务端：从 Cookie 读取
+	// 如果提供了 request，使用它；否则尝试从全局 Astro 对象获取
+	let actualRequest = request;
+	if (!actualRequest && typeof globalThis !== "undefined") {
+		// 尝试从全局 Astro 对象获取 request（在 Astro 组件中可用）
+		try {
+			const astro = (globalThis as any).Astro;
+			if (astro?.request) {
+				actualRequest = astro.request;
+			}
+		} catch (e) {
+			// 忽略错误
+		}
+	}
+	
+	if (actualRequest) {
+		const cookieHeader = actualRequest.headers.get("cookie");
+		const cookieLang = getLanguageFromCookie(cookieHeader);
+		console.log("getCurrentLanguage (服务端): Cookie头", cookieHeader, "提取的语言", cookieLang);
+		if (cookieLang) {
+			return cookieLang;
+		}
+	}
+	
+	// 默认使用配置文件中的语言
+	console.log("getCurrentLanguage (服务端): 使用默认语言", siteConfig.lang);
+	return siteConfig.lang || "en";
+}
+
+export function i18n(key: I18nKey, request?: Request): string {
+	const lang = getCurrentLanguage(request);
 	const translatedText = getTranslation(lang)[key];
-	console.log(`i18n: 翻译键 ${key} 到 ${translatedText}`);
+	// 只在服务端输出调试信息（通过检查是否有request来判断）
+	if (request && typeof window === "undefined") {
+		console.log(`[服务端] i18n(${key}): 语言=${lang}, 结果=${translatedText}`);
+	}
 	return translatedText;
+}
+
+/**
+ * 在 Astro 组件中使用的 i18n 辅助函数，自动从 Astro.request 读取语言
+ * 使用方式：const t = getI18n(Astro); t(I18nKey.home)
+ */
+export function getI18n(astro: { request: Request }) {
+	return (key: I18nKey) => i18n(key, astro.request);
 }

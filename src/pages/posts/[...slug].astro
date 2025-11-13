@@ -58,6 +58,31 @@ const lastModified = dayjs(entry.data.updated || entry.data.published)
 	.utc()
 	.format("YYYY-MM-DDTHH:mm:ss");
 
+// @ts-ignore - Astro is available globally in Astro components
+const request = Astro.request;
+// @ts-ignore
+const wordsCountText = i18n(I18nKey.wordsCount, request);
+// @ts-ignore
+const minuteCountText = i18n(I18nKey.minuteCount, request);
+// @ts-ignore
+const minutesCountText = i18n(I18nKey.minutesCount, request);
+// @ts-ignore
+const lastModifiedPrefix = i18n(I18nKey.lastModifiedPrefix, request);
+// @ts-ignore
+const yearText = i18n(I18nKey.year, request);
+// @ts-ignore
+const monthText = i18n(I18nKey.month, request);
+// @ts-ignore
+const dayText = i18n(I18nKey.day, request);
+// @ts-ignore
+const hourText = i18n(I18nKey.hour, request);
+// @ts-ignore
+const minuteText = i18n(I18nKey.minute, request);
+// @ts-ignore
+const secondText = i18n(I18nKey.second, request);
+// @ts-ignore
+const lastModifiedOutdated = i18n(I18nKey.lastModifiedOutdated, request);
+
 const jsonLd = {
 	"@context": "https://schema.org",
 	"@type": "BlogPosting",
@@ -114,7 +139,7 @@ const jsonLd = {
                     </div>
                     <div class="text-sm">
                         {remarkPluginFrontmatter.words}
-                        {" " + i18n(I18nKey.wordsCount)}
+                        {" " + wordsCountText}
                     </div>
                 </div>
                 <div class="flex flex-row items-center">
@@ -127,14 +152,7 @@ const jsonLd = {
                     </div>
                     <div class="text-sm">
                         {remarkPluginFrontmatter.minutes}
-                        {
-                            " " +
-                                i18n(
-                                    remarkPluginFrontmatter.minutes === 1
-                                        ? I18nKey.minuteCount
-                                        : I18nKey.minutesCount,
-                                )
-                        }
+                        {" " + (remarkPluginFrontmatter.minutes === 1 ? minuteCountText : minutesCountText)}
                     </div>
                 </div>
             </div>
@@ -225,13 +243,13 @@ const jsonLd = {
             <div 
                 id="last-modified" 
                 data-last-modified={lastModified}
-                data-prefix={i18n(I18nKey.lastModifiedPrefix)}
-                data-year={i18n(I18nKey.year)}
-                data-month={i18n(I18nKey.month)}
-                data-day={i18n(I18nKey.day)}
-                data-hour={i18n(I18nKey.hour)}
-                data-minute={i18n(I18nKey.minute)}
-                data-second={i18n(I18nKey.second)}
+                data-prefix={lastModifiedPrefix}
+                data-year={yearText}
+                data-month={monthText}
+                data-day={dayText}
+                data-hour={hourText}
+                data-minute={minuteText}
+                data-second={secondText}
                 style="display: none;"
             ></div>
 
@@ -300,7 +318,7 @@ const jsonLd = {
                         <div class="flex flex-col gap-0.1">
                             <div id="modifiedtime" class="text-[1.0rem] leading-tight text-black/75 dark:text-white/75"></div>
                             <p class="text-[0.8rem] leading-tight text-black/75 dark:text-white/75">
-                                {i18n(I18nKey.lastModifiedOutdated)}
+                                {lastModifiedOutdated}
                             </p>
                         </div>
                     </div>
