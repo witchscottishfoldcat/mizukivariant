@@ -4,6 +4,7 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/700.css";
 
 import ConfigCarrier from "@components/ConfigCarrier.astro";
+import LanguageInit from "@components/LanguageInit.astro";
 import MusicPlayer from "@components/widget/MusicPlayer.svelte";
 import Pio from "@components/widget/Pio.svelte"; // 使用 Svelte 版本的 Pio 组件
 import { profileConfig, siteConfig } from "@/config";
@@ -21,6 +22,7 @@ import {
 import { defaultFavicons } from "../constants/icon";
 import type { Favicon, SakuraConfig } from "../types/config";
 import { pathsEqual, url } from "../utils/url-utils";
+import { initLanguageSettings } from "@utils/language-utils";
 
 import "katex/dist/katex.css";
 import "../styles/mobile-navbar.css";
@@ -235,9 +237,11 @@ const umamiScripts = umamiConfig.scripts || ""; // 获取Umami scripts配置
 		<script src="/js/timeline-scroll-handler.js" defer></script>
 		<script src="/js/skills-progress-handler.js" defer></script>
 </head>
-	<body class=" min-h-screen " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner, "zen-maru-gothic-enabled": siteConfig.font.zenMaruGothic.enable, "hanalei-enabled": siteConfig.font.hanalei.enable}]}
-		  data-overlayscrollbars-initialize
+<body class=" min-h-screen " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner, "zen-maru-gothic-enabled": siteConfig.font.zenMaruGothic.enable, "hanalei-enabled": siteConfig.font.hanalei.enable}]}
+		data-overlayscrollbars-initialize
 	>
+		<!-- 尽早初始化语言设置 -->
+		<LanguageInit />
 		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KRX3XGVH" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 		
 		<!-- 页面顶部渐变高光效果 - 只在full和semifull模式下显示 -->
@@ -1251,6 +1255,17 @@ window.onresize = () => {
 	offset = offset - offset % 4;
 	document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
 }
+
+// 在页面内容渲染前初始化语言设置
+const lang = initLanguageSettings();
+// 确保页面使用正确的语言
+document.documentElement.lang = lang;
+// 触发一个自定义事件，通知语言已初始化
+window.dispatchEvent(new CustomEvent('language-initialized', { detail: { lang } }));
+
+// 调试i18n函数
+import { debugI18n } from "@i18n/debug";
+debugI18n();
 
 // 页面加载完成后初始化banner和轮播图
 if (document.readyState === 'loading') {

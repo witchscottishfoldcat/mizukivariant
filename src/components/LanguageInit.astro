@@ -1,0 +1,41 @@
+---
+// 这个组件用于在页面加载时尽早初始化语言设置
+import { siteConfig } from "../config";
+
+// 尝试从Cookie中获取语言设置
+function getLanguageFromCookie(request: Request) {
+  const cookieHeader = request.headers.get("cookie") || "";
+  const cookies = cookieHeader.split(";").map(c => c.trim());
+  const languageCookie = cookies.find(c => c.startsWith("language="));
+  return languageCookie ? languageCookie.split("=")[1] : siteConfig.lang;
+}
+
+// 获取当前请求的语言
+let currentLang = siteConfig.lang;
+if (Astro.request) {
+  currentLang = getLanguageFromCookie(Astro.request);
+}
+---
+
+<script is:inline>
+  // 在页面渲染前尽早初始化语言设置
+  (function() {
+    // 获取语言设置
+    let lang = "{currentLang}";
+    
+    // 如果没有在服务端获取到语言，尝试从localStorage获取
+    if (typeof window !== "undefined") {
+      const storedLang = localStorage.getItem("language");
+      if (storedLang) {
+        lang = storedLang;
+      }
+      
+      // 设置全局变量
+      window.__currentLanguage = lang;
+      document.documentElement.lang = lang;
+      
+      // 调试输出
+      console.log("LanguageInit: 设置语言为", lang);
+    }
+  })();
+</script>
