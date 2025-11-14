@@ -27,6 +27,255 @@ function getCurrentLanguage() {
 let currentLang = $state(getCurrentLanguage());
 let isDropdownOpen = $state(false);
 
+// 检查是否为首页
+function isHomePage(): boolean {
+	if (typeof window === "undefined") return false;
+	const path = window.location.pathname;
+	return path === "/" || path === "" || path === "/index.html";
+}
+
+// 同步语言设置：从 Cookie 和 localStorage 读取并更新状态
+function syncLanguageFromStorage(forceUpdate = false) {
+	const cookieLang = document.cookie
+		.split(";")
+		.find((c) => c.trim().startsWith("language="))
+		?.split("=")[1]
+		?.trim();
+
+	const storedLang = localStorage.getItem("language");
+
+	// 优先使用 Cookie，然后是 localStorage
+	const lang = cookieLang || storedLang || "en";
+
+	if (lang !== currentLang || forceUpdate) {
+		console.log(
+			"LanguageSwitch: 从存储同步语言",
+			lang,
+			"当前语言",
+			currentLang,
+			"强制更新",
+			forceUpdate,
+		);
+		currentLang = lang;
+		if (typeof window !== "undefined") {
+			(window as any).__currentLanguage = lang;
+		}
+		document.documentElement.lang = lang;
+		// 确保 Cookie 和 localStorage 同步
+		if (cookieLang && cookieLang !== storedLang) {
+			localStorage.setItem("language", cookieLang);
+		}
+		if (storedLang && storedLang !== cookieLang) {
+			const cookieValue = `language=${storedLang}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+			document.cookie = cookieValue;
+		}
+		// 更新页面文本
+		updateNavbarTexts();
+		updatePageTexts();
+	}
+}
+
+// 强制更新页面文本（带重试机制）
+function forceUpdatePageTexts(retries = 3, delay = 200) {
+	const lang = currentLang;
+	const isHome = isHomePage();
+
+	// 首页使用更温和的更新策略（减少重试次数和延迟）
+	const finalRetries = isHome ? 1 : retries;
+	const finalDelay = isHome ? 300 : delay;
+
+	console.log(
+		`LanguageSwitch: 强制更新页面文本，语言: ${lang}, 剩余重试: ${finalRetries}, 首页: ${isHome}`,
+	);
+
+	// 同步语言设置
+	syncLanguageFromStorage();
+
+	// 更新页面文本
+	updatePageTexts();
+
+	// 如果还有重试次数，延迟后再次尝试（首页只重试一次）
+	if (finalRetries > 0) {
+		setTimeout(() => {
+			forceUpdatePageTexts(finalRetries - 1, finalDelay);
+		}, finalDelay);
+	}
+}
+
+// 监听 Swup 页面切换事件，确保语言设置持久化
+function setupSwupListeners() {
+	if (typeof window !== "undefined" && (window as any).swup) {
+		const swup = (window as any).swup;
+
+		// 页面内容替换后同步语言设置（立即执行）
+		swup.hooks.on("content:replace", () => {
+			console.log("LanguageSwitch: Swup content:replace 事件");
+			// 立即同步一次
+			setTimeout(() => {
+				syncLanguageFromStorage();
+			}, 50);
+		});
+
+		// 页面视图切换后同步语言设置
+		swup.hooks.on("page:view", () => {
+			console.log("LanguageSwitch: Swup page:view 事件");
+			const isHome = isHomePage();
+			// 首页使用更温和的更新策略
+			if (isHome) {
+				setTimeout(() => {
+					syncLanguageFromStorage();
+					updatePageTexts();
+				}, 200);
+			} else {
+				// 非首页使用强制更新
+				setTimeout(() => {
+					forceUpdatePageTexts(3, 200);
+				}, 150);
+			}
+		});
+
+		// 动画结束后同步语言设置（最重要，此时内容已完全加载）
+		swup.hooks.on("animation:in:end", () => {
+			console.log("LanguageSwitch: Swup animation:in:end 事件");
+			const isHome = isHomePage();
+			// 首页使用更温和的更新策略
+			if (isHome) {
+				setTimeout(() => {
+					syncLanguageFromStorage();
+					updatePageTexts();
+				}, 150);
+			} else {
+				// 非首页使用强制更新
+				setTimeout(() => {
+					forceUpdatePageTexts(3, 200);
+				}, 100);
+			}
+		});
+
+		console.log("LanguageSwitch: Swup 监听器已注册");
+	} else {
+		// 如果 Swup 尚未初始化，延迟重试
+		setTimeout(() => {
+			setupSwupListeners();
+		}, 200);
+	}
+}
+
+// 初始化时设置 Swup 监听器并同步语言
+if (typeof window !== "undefined") {
+	// 页面加载时立即同步语言设置
+	syncLanguageFromStorage();
+
+	// 设置 Swup 监听器
+	setTimeout(setupSwupListeners, 100);
+
+	// 也监听浏览器前进/后退
+	window.addEventListener("popstate", () => {
+		const isHome = isHomePage();
+		if (isHome) {
+			// 首页使用更温和的更新
+			setTimeout(() => {
+				syncLanguageFromStorage();
+				updatePageTexts();
+			}, 200);
+		} else {
+			// 非首页使用强制更新
+			setTimeout(() => {
+				forceUpdatePageTexts(3, 200);
+			}, 150);
+		}
+	});
+
+	// 监听 DOM 内容变化，确保在内容加载后更新语言
+	if (typeof MutationObserver !== "undefined") {
+		let updateTimeout: ReturnType<typeof setTimeout> | null = null;
+
+		const observer = new MutationObserver((mutations) => {
+			let shouldUpdate = false;
+			mutations.forEach((mutation) => {
+				if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+					// 检查是否有新的主要内容被添加
+					mutation.addedNodes.forEach((node) => {
+						if (node.nodeType === 1) {
+							const element = node as Element;
+							// 检查是否是主要内容区域或包含 i18n 元素
+							if (
+								element.tagName === "MAIN" ||
+								element.tagName === "ARTICLE" ||
+								element.querySelector?.("main") ||
+								element.querySelector?.("article") ||
+								element.querySelector?.("[data-i18n]") ||
+								element.hasAttribute?.("data-i18n")
+							) {
+								shouldUpdate = true;
+							}
+						}
+					});
+				}
+			});
+			if (shouldUpdate) {
+				// 防抖：延迟更新，确保内容已完全渲染
+				if (updateTimeout) {
+					clearTimeout(updateTimeout);
+				}
+				updateTimeout = setTimeout(() => {
+					const isHome = isHomePage();
+					console.log("LanguageSwitch: DOM 内容变化，更新语言，首页:", isHome);
+					if (isHome) {
+						// 首页使用更温和的更新
+						syncLanguageFromStorage();
+						updatePageTexts();
+					} else {
+						// 非首页使用强制更新
+						forceUpdatePageTexts(2, 150);
+					}
+				}, 200);
+			}
+		});
+
+		// 观察 body 元素的变化（因为 Swup 会替换整个 main 内容）
+		const bodyElement = document.body;
+		if (bodyElement) {
+			observer.observe(bodyElement, {
+				childList: true,
+				subtree: true,
+			});
+			console.log("LanguageSwitch: MutationObserver 已设置，观察 body 变化");
+		}
+
+		// 在 Swup 切换时重新设置观察器（因为 main 元素可能被替换）
+		if ((window as any).swup) {
+			const swup = (window as any).swup;
+			swup.hooks.on("content:replace", () => {
+				setTimeout(() => {
+					const mainElement = document.querySelector("main");
+					if (mainElement && !mainElement.isConnected) {
+						// main 元素被替换，重新观察
+						const newMainElement = document.querySelector("main");
+						if (newMainElement) {
+							observer.observe(newMainElement, {
+								childList: true,
+								subtree: true,
+							});
+							console.log("LanguageSwitch: 重新设置 MutationObserver");
+						}
+					}
+				}, 50);
+			});
+		}
+	}
+
+	// 监听语言变化事件（从其他组件触发）
+	window.addEventListener("language-changed", () => {
+		syncLanguageFromStorage();
+	});
+
+	// 定期同步语言设置（防止意外丢失）
+	setInterval(() => {
+		syncLanguageFromStorage();
+	}, 5000); // 每5秒检查一次
+}
+
 // 切换语言函数
 function switchLanguage(lang: string) {
 	console.log("LanguageSwitch: 切换语言到", lang);
@@ -48,34 +297,43 @@ function switchLanguage(lang: string) {
 
 	// 同时设置Cookie，使服务端也能获取到语言设置
 	// 使用更明确的 Cookie 设置方式，确保在根路径下可用
-	const cookieValue = `language=${lang}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax; Secure=false`;
+	// 设置 Cookie（有效期1年）
+	const cookieValue = `language=${lang}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
 	document.cookie = cookieValue;
 	console.log("LanguageSwitch: 已设置Cookie", cookieValue);
 	console.log("LanguageSwitch: 当前所有Cookie", document.cookie);
 
-	// 验证 Cookie 是否设置成功
-	const cookieCheck = document.cookie
-		.split(";")
-		.find((c) => c.trim().startsWith("language="));
-	console.log("LanguageSwitch: Cookie验证", cookieCheck);
-
-	// 强制验证：立即读取 Cookie 确认设置成功
-	setTimeout(() => {
-		const verifyCookie = document.cookie
+	// 多次验证 Cookie 是否设置成功（确保持久化）
+	const verifyCookie = () => {
+		const cookie = document.cookie
 			.split(";")
-			.find((c) => c.trim().startsWith("language="));
-		console.log("LanguageSwitch: 延迟验证Cookie", verifyCookie);
-		if (!verifyCookie || !verifyCookie.includes(lang)) {
-			console.error(
-				"LanguageSwitch: Cookie设置失败！",
+			.find((c) => c.trim().startsWith("language="))
+			?.split("=")[1]
+			?.trim();
+
+		if (!cookie || cookie !== lang) {
+			console.warn(
+				"LanguageSwitch: Cookie验证失败，重试设置",
 				"期望:",
 				lang,
 				"实际:",
-				verifyCookie,
+				cookie,
 			);
 			// 重试设置 Cookie
 			document.cookie = cookieValue;
-			console.log("LanguageSwitch: 重试设置Cookie");
+			return false;
+		}
+		return true;
+	};
+
+	// 立即验证
+	verifyCookie();
+
+	// 延迟验证（确保 Cookie 已写入）
+	setTimeout(() => {
+		if (!verifyCookie()) {
+			// 如果还是失败，再试一次
+			setTimeout(verifyCookie, 100);
 		}
 	}, 50);
 

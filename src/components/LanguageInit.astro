@@ -58,20 +58,32 @@ if (Astro.request) {
         const storedLang = localStorage.getItem("language");
         if (storedLang) {
           lang = storedLang;
-          // 同步到 Cookie（确保 Cookie 存在）
+          // 同步到 Cookie（确保 Cookie 存在，有效期1年）
           const cookieValue = `language=${lang}; path=/; max-age=${60*60*24*365}; SameSite=Lax`;
           document.cookie = cookieValue;
           console.log("LanguageInit: 从localStorage设置语言并同步到Cookie", lang, cookieValue);
           
-          // 验证 Cookie 是否设置成功
-          setTimeout(() => {
-            const verifyCookie = document.cookie.split(";").find(c => c.trim().startsWith("language="));
-            console.log("LanguageInit: Cookie验证", verifyCookie);
-            if (!verifyCookie || !verifyCookie.includes(lang)) {
-              console.error("LanguageInit: Cookie设置失败！重试...");
+          // 多次验证 Cookie 是否设置成功（确保持久化）
+          const verifyCookie = () => {
+            const cookie = document.cookie.split(";").find(c => c.trim().startsWith("language="))?.split("=")[1]?.trim();
+            if (!cookie || cookie !== lang) {
+              console.warn("LanguageInit: Cookie验证失败，重试设置", "期望:", lang, "实际:", cookie);
               document.cookie = cookieValue;
+              return false;
             }
-          }, 10);
+            return true;
+          };
+          
+          // 立即验证
+          verifyCookie();
+          
+          // 延迟验证（确保 Cookie 已写入）
+          setTimeout(() => {
+            if (!verifyCookie()) {
+              // 如果还是失败，再试一次
+              setTimeout(verifyCookie, 100);
+            }
+          }, 50);
         }
       }
       
