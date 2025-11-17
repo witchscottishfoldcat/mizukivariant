@@ -71,6 +71,7 @@ export const en: Translation = {
 	[Key.diaryMinutesAgo]: "minutes ago",
 	[Key.diaryHoursAgo]: "hours ago",
 	[Key.diaryDaysAgo]: "days ago",
+	[Key.diaryContentCherryBlossom]: "The falling speed of cherry blossoms is five centimeters per second!",
 
 	// 404 Page
 	[Key.notFound]: "404",

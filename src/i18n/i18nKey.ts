@@ -67,6 +67,7 @@ enum I18nKey {
 	diaryMinutesAgo = "diaryMinutesAgo",
 	diaryHoursAgo = "diaryHoursAgo",
 	diaryDaysAgo = "diaryDaysAgo",
+	diaryContentCherryBlossom = "diaryContentCherryBlossom",
 
 	// 404页面
 	notFound = "notFound",

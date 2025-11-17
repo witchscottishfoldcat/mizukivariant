@@ -69,6 +69,7 @@ export const zh_CN: Translation = {
 	[Key.diaryMinutesAgo]: "分钟前",
 	[Key.diaryHoursAgo]: "小时前",
 	[Key.diaryDaysAgo]: "天前",
+	[Key.diaryContentCherryBlossom]: "樱花飘落的速度是每秒五厘米！",
 
 	// 404页面
 	[Key.notFound]: "404",

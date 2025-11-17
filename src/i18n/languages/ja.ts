@@ -71,6 +71,7 @@ export const ja: Translation = {
 	[Key.diaryMinutesAgo]: "分前",
 	[Key.diaryHoursAgo]: "時間前",
 	[Key.diaryDaysAgo]: "日前",
+	[Key.diaryContentCherryBlossom]: "桜の落下速度は秒速5センチメートル！",
 
 	// 404ページ
 	[Key.notFound]: "404",

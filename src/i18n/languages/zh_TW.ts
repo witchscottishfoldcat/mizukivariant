@@ -69,6 +69,7 @@ export const zh_TW: Translation = {
 	[Key.diaryMinutesAgo]: "分鐘前",
 	[Key.diaryHoursAgo]: "小時前",
 	[Key.diaryDaysAgo]: "天前",
+	[Key.diaryContentCherryBlossom]: "櫻花飄落的速度是每秒五厘米！",
 
 	// 404頁面
 	[Key.notFound]: "404",

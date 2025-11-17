@@ -9,17 +9,6 @@ if (!siteConfig.featurePages.diary) {
 	return Astro.redirect("/404/");
 }
 
-// 示例即刻短文数据
-const moments = [
-	{
-		id: 1,
-		content:
-			"The falling speed of cherry blossoms is five centimeters per second!",
-		date: "2025-01-15T10:30:00Z",
-		images: ["/images/diary/sakura.jpg", "/images/diary/1.jpg"],
-	},
-];
-
 // @ts-ignore - Astro is available globally in Astro components
 const diaryTitle = i18n(I18nKey.diary, Astro.request);
 // @ts-ignore
@@ -38,6 +27,18 @@ const diaryImage = i18n(I18nKey.diaryImage, Astro.request);
 const diaryReply = i18n(I18nKey.diaryReply, Astro.request);
 // @ts-ignore
 const diaryTips = i18n(I18nKey.diaryTips, Astro.request);
+// @ts-ignore
+const diaryContentCherryBlossom = i18n(I18nKey.diaryContentCherryBlossom, Astro.request);
+
+// 示例即刻短文数据
+const moments = [
+	{
+		id: 1,
+		content: diaryContentCherryBlossom,
+		date: "2025-01-15T10:30:00Z",
+		images: ["/images/diary/sakura.jpg", "/images/diary/1.jpg"],
+	},
+];
 
 // 时间格式化函数
 function formatTime(dateString: string): string {
@@ -48,15 +49,15 @@ function formatTime(dateString: string): string {
 	);
 
 	if (diffInMinutes < 60) {
-		return `${diffInMinutes}${diaryMinutesAgo}`;
+		return `${diffInMinutes} ${diaryMinutesAgo}`;
 	}
 	if (diffInMinutes < 1440) {
 		// 24小时
 		const hours = Math.floor(diffInMinutes / 60);
-		return `${hours}${diaryHoursAgo}`;
+		return `${hours} ${diaryHoursAgo}`;
 	}
 	const days = Math.floor(diffInMinutes / 1440);
-	return `${days}${diaryDaysAgo}`;
+	return `${days} ${diaryDaysAgo}`;
 }
 ---
 
